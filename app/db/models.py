@@ -1,32 +1,50 @@
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
-from sqlalchemy.orm import relationship
+from typing import List, Optional
+from datetime import datetime
+from pydantic import BaseModel
 
-from .database import Base
+class MovieBase(BaseModel):
+    title: str
+    duration: int
+    language: str
+    director: str
+    age_minimum: int
 
-class Movie(Base):
-    __tablename__ = "movies"
+class MovieCreate(MovieBase):
+    pass
 
-    id = Column(Integer, primary_key=True, index=True)
-    title = Column(String, index=True)
-    duration = Column(Integer)
-    language = Column(String)
-    director = Column(String)
-    age_minimum = Column(Integer)
-    theaters = relationship("Theater", secondary="schedules")
+class Movie(MovieBase):
+    id: int
+    theaters: List["Theater"] = []
 
-class Theater(Base):
-    __tablename__ = "theaters"
+    class Config:
+        orm_mode = True
 
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, index=True)
-    address = Column(String)
-    schedules = relationship("Schedule", back_populates="theater")
+class TheaterBase(BaseModel):
+    name: str
+    address: str
 
-class Schedule(Base):
-    __tablename__ = "schedules"
+class TheaterCreate(TheaterBase):
+    pass
 
-    movie_id = Column(Integer, ForeignKey("movies.id"), primary_key=True)
-    theater_id = Column(Integer, ForeignKey("theaters.id"), primary_key=True)
-    start_time = Column(DateTime)
-    end_time = Column(DateTime)
-    theater = relationship("Theater", back_populates="schedules")
+class Theater(TheaterBase):
+    id: int
+    schedules: List["Schedule"] = []
+
+    class Config:
+        orm_mode = True
+
+class ScheduleBase(BaseModel):
+    start_time: datetime
+    end_time: datetime
+
+class ScheduleCreate(ScheduleBase):
+    movie_id: int
+    theater_id: int
+
+class Schedule(ScheduleBase):
+    id: int
+    movie: Movie
+    theater: Theater
+
+    class Config:
+        orm_mode = True

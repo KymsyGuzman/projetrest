@@ -1,15 +1,14 @@
-from fastapi import APIRouter
-from typing import List
-from app.db.models import Theater, Movie
+from fastapi import APIRouter, HTTPException
+from sqlalchemy.orm import Session
+
 from app.db.database import SessionLocal
+from app.db import models
 
 router = APIRouter()
 
-@router.get("/{theater_id}")
-def read_theater(theater_id: int):
-    db = SessionLocal()
-    theater = db.query(Theater).filter(Theater.id == theater_id).first()
-    return theater
-
-@router.get("/")
-def read_theaters(city
+@router.get("/{city}")
+async def read_theaters(city: str, db: Session = SessionLocal()):
+    theaters = db.query(models.Theater).filter(models.Theater.city == city).all()
+    if not theaters:
+        raise HTTPException(status_code=404, detail="No theaters found for this city")
+    return theaters
