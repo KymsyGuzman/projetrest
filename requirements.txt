@@ -1,0 +1,7 @@
+fastapi==0.95.1
+SQLAlchemy==1.4.22
+python-dotenv==0.19.1
+jose
+passlib
+python-jose
+#python-jose==3.3.0
